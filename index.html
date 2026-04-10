@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>History — Plataforma FUVEST</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <style>
+    body { overflow-x: hidden; }
+    .index-topbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px; background: #0c0e17ee;
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 32px;
+    }
+    .index-topbar .logo {
+      font-size: 1.15rem; font-weight: 800; color: var(--gold);
+      letter-spacing: -0.5px;
+    }
+    .index-topbar .logo span { color: var(--text); font-weight: 300; }
+    .wrap { padding-top: 56px; }
+    .index-hero {
+      text-align: center; padding: 72px 40px 56px;
+      max-width: 800px; margin: 0 auto;
+    }
+    .index-hero .badge {
+      display: inline-block;
+      background: var(--gold-dim); border: 1px solid var(--gold);
+      color: var(--gold); font-size: 0.72rem; font-weight: 700;
+      padding: 4px 14px; border-radius: 99px; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 20px;
+    }
+    .index-hero h1 {
+      font-size: 3.2rem; font-weight: 800; letter-spacing: -1px;
+      line-height: 1.1; margin-bottom: 20px;
+    }
+    .index-hero h1 em { color: var(--gold); font-style: normal; }
+    .index-hero p {
+      font-size: 1.05rem; color: var(--text-muted);
+      max-width: 560px; margin: 0 auto 36px;
+    }
+    .index-stats {
+      display: flex; gap: 40px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 60px;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 2.2rem; font-weight: 800; color: var(--gold); line-height: 1; }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 4px; }
+
+    /* Seção de blocos */
+    .section-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--text-muted);
+      padding: 0 40px; max-width: 1120px; margin: 0 auto 16px;
+    }
+    .blocos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px; padding: 0 40px 80px;
+      max-width: 1120px; margin: 0 auto;
+    }
+
+    /* Card de bloco */
+    .bloco-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      text-decoration: none; color: var(--text);
+      transition: all .2s; display: block;
+    }
+    .bloco-card:hover {
+      border-color: var(--gold);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px #00000050;
+    }
+    .bloco-card-top {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; margin-bottom: 12px;
+    }
+    .bloco-num {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--gold);
+    }
+    .bloco-status {
+      font-size: 0.7rem; font-weight: 600;
+      padding: 2px 10px; border-radius: 99px;
+    }
+    .status-done { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+    .status-wip  { background: var(--gold-dim);  color: var(--gold);  border: 1px solid var(--gold); }
+    .status-todo { background: var(--surface2);  color: var(--text-muted); border: 1px solid var(--border); }
+
+    .bloco-card h3 {
+      font-size: 1rem; font-weight: 700; color: var(--text); margin: 0 0 8px;
+    }
+    .bloco-card p {
+      font-size: 0.82rem; color: var(--text-muted); margin: 0 0 16px; line-height: 1.6;
+    }
+    .bloco-links {
+      display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .bloco-link {
+      font-size: 0.75rem; padding: 4px 12px; border-radius: var(--radius-sm);
+      text-decoration: none; font-weight: 500; transition: all .15s;
+      border: 1px solid var(--border);
+    }
+    .bloco-link-content {
+      background: var(--surface2); color: var(--text-muted);
+    }
+    .bloco-link-content:hover { border-color: var(--blue); color: var(--blue); }
+    .bloco-link-sim {
+      background: var(--gold-dim); color: var(--gold); border-color: var(--gold);
+    }
+    .bloco-link-sim:hover { background: var(--gold); color: #000; }
+    .bloco-link-disabled {
+      opacity: 0.35; cursor: not-allowed; pointer-events: none;
+      background: var(--surface2); color: var(--text-muted);
+    }
+
+    /* Temas sub-lista */
+    .bloco-temas {
+      margin: 0 0 16px; padding: 0;
+      list-style: none; display: flex; flex-direction: column; gap: 3px;
+    }
+    .bloco-temas li {
+      font-size: 0.78rem; color: var(--text-muted);
+      display: flex; align-items: center; gap: 6px;
+    }
+    .bloco-temas li::before {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: var(--border); flex-shrink: 0;
+    }
+    .bloco-temas li.done { color: var(--text); }
+    .bloco-temas li.done::before { background: var(--green); }
+
+    /* Footer */
+    .footer {
+      text-align: center; padding: 32px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted); font-size: 0.8rem;
+    }
+    .footer strong { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <!-- Topbar -->
+  <nav class="index-topbar">
+    <span class="logo">History <span>/ FUVEST</span></span>
+  </nav>
+
+  <div class="wrap">
+
+    <!-- Hero -->
+    <div class="index-hero">
+      <div class="badge">Plataforma de Estudos</div>
+      <h1>Domine a<br/><em>História</em> para a FUVEST</h1>
+      <p>Material completo — do zero ao nível segunda fase. Guias teóricos + simulados interativos organizados por blocos temáticos.</p>
+
+      <div class="index-stats">
+        <div class="stat">
+          <div class="stat-num">11</div>
+          <div class="stat-label">Blocos Temáticos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">85</div>
+          <div class="stat-label">Temas Cobertos</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">550+</div>
+          <div class="stat-label">Questões FUVEST</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num">100%</div>
+          <div class="stat-label">Gratuito</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grade de blocos -->
+    <div class="section-label">— História Geral</div>
+    <div class="blocos-grid">
+
+      <!-- Bloco 01 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 01</span>
+          <span class="bloco-status status-wip">Em produção</span>
+        </div>
+        <h3>História Geral Antiga</h3>
+        <ul class="bloco-temas">
+          <li class="done">Pré-História e primeiras civilizações</li>
+          <li class="done">Mesopotâmia e o Crescente Fértil</li>
+          <li class="done">Egito Antigo</li>
+          <li class="done">Grécia Antiga</li>
+          <li class="done">Roma Antiga</li>
+          <li class="done">Pérsia e mundo helenístico</li>
+        </ul>
+        <div class="bloco-links">
+          <a href="bloco-01-antiguidade/01-pre-historia.html" class="bloco-link bloco-link-content">Pré-História</a>
+          <a href="bloco-01-antiguidade/02-mesopotamia.html" class="bloco-link bloco-link-content">Mesopotâmia</a>
+          <a href="bloco-01-antiguidade/03-egito.html" class="bloco-link bloco-link-content">Egito</a>
+          <a href="bloco-01-antiguidade/04-grecia.html" class="bloco-link bloco-link-content">Grécia</a>
+          <a href="bloco-01-antiguidade/05-roma.html" class="bloco-link bloco-link-content">Roma</a>
+          <a href="bloco-01-antiguidade/06-persia-helenismo.html" class="bloco-link bloco-link-content">Pérsia</a>
+          <a href="bloco-01-antiguidade/simulado.html" class="bloco-link bloco-link-sim">Simulado 50Q</a>
+        </div>
+      </div>
+
+      <!-- Bloco 02 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 02</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>História Medieval</h3>
+        <ul class="bloco-temas">
+          <li>Feudalismo: estrutura e dissolução</li>
+          <li>Igreja Católica Medieval</li>
+          <li>Islamismo: origem e expansão</li>
+          <li>Bizâncio e o Oriente Medieval</li>
+          <li>Crise do século XIV</li>
+          <li>Formação dos Estados Nacionais</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+      <!-- Bloco 03 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 03</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>História Moderna</h3>
+        <ul class="bloco-temas">
+          <li>Humanismo e Renascimento</li>
+          <li>Grandes Navegações</li>
+          <li>Reforma Protestante e Contrarreforma</li>
+          <li>Absolutismo e Mercantilismo</li>
+          <li>Revolução Inglesa</li>
+          <li>Iluminismo</li>
+          <li>Revolução Americana</li>
+          <li>Revolução Francesa</li>
+          <li>Era Napoleônica</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+      <!-- Bloco 04 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 04</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Século XIX — Contemporânea I</h3>
+        <ul class="bloco-temas">
+          <li>Revolução Industrial (1ª e 2ª fases)</li>
+          <li>Nacionalismo e unificações</li>
+          <li>Imperialismo e neocolonialismo</li>
+          <li>Movimentos operários e socialismo</li>
+          <li>América Latina: independências</li>
+          <li>EUA: Guerra Civil e expansão</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+    </div><!-- /grid geral -->
+
+    <div class="section-label" style="margin-top:8px">— Século XX (1ª metade)</div>
+    <div class="blocos-grid">
+
+      <!-- Bloco 05 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 05</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Contemporânea II — 1ª metade do séc. XX</h3>
+        <ul class="bloco-temas">
+          <li>Primeira Guerra Mundial</li>
+          <li>Revolução Russa (1917)</li>
+          <li>Fascismo e Nazismo</li>
+          <li>Entre-guerras: crise de 1929</li>
+          <li>Segunda Guerra Mundial</li>
+          <li>Guerra Fria: origem</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+      <!-- Bloco 06 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 06</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Contemporânea III — 2ª metade do séc. XX</h3>
+        <ul class="bloco-temas">
+          <li>Descolonização da África e Ásia</li>
+          <li>Guerra Fria: conflitos periféricos</li>
+          <li>Fim da Guerra Fria e queda da URSS</li>
+          <li>China: revolução comunista</li>
+          <li>Oriente Médio: conflitos e petróleo</li>
+          <li>Globalização e neoliberalismo</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-label" style="margin-top:8px">— História do Brasil</div>
+    <div class="blocos-grid">
+
+      <!-- Bloco 07 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 07</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Brasil Colonial (1500–1822)</h3>
+        <ul class="bloco-temas">
+          <li>Povos indígenas pré-cabralinos</li>
+          <li>Descobrimento e primeiros contatos</li>
+          <li>Sistema colonial: capitanias</li>
+          <li>Plantation e escravidão africana</li>
+          <li>União Ibérica e invasões</li>
+          <li>Ciclo do açúcar e do ouro</li>
+          <li>Revoltas coloniais e Inconfidências</li>
+          <li>Transferência da Corte (1808)</li>
+          <li>Independência do Brasil</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+      <!-- Bloco 08 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 08</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Brasil Imperial (1822–1889)</h3>
+        <ul class="bloco-temas">
+          <li>Primeiro Reinado e Constituição de 1824</li>
+          <li>Período Regencial e revoltas</li>
+          <li>Segundo Reinado: política e economia</li>
+          <li>Abolicionismo e escravidão</li>
+          <li>Guerra do Paraguai</li>
+          <li>Crise do Império e República</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+      <!-- Bloco 09 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 09</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Brasil República 1889–1945</h3>
+        <ul class="bloco-temas">
+          <li>República da Espada e Oligárquica</li>
+          <li>Política café-com-leite e coronelismo</li>
+          <li>Canudos e Contestado</li>
+          <li>Tenentismo e crise da República Velha</li>
+          <li>Revolução de 1930 e Era Vargas</li>
+          <li>Estado Novo e trabalhismo</li>
+          <li>Semana de Arte Moderna (1922)</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+      <!-- Bloco 10 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 10</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Brasil República 1945–Presente</h3>
+        <ul class="bloco-temas">
+          <li>Redemocratização de 1945 e populismo</li>
+          <li>JK e desenvolvimentismo</li>
+          <li>Crise do populismo e Goulart</li>
+          <li>Golpe Militar de 1964</li>
+          <li>Ditadura Militar (1964–1985)</li>
+          <li>Redemocratização e Constituição 1988</li>
+          <li>Nova República até o presente</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-label" style="margin-top:8px">— Temas Transversais</div>
+    <div class="blocos-grid">
+
+      <!-- Bloco 11 -->
+      <div class="bloco-card">
+        <div class="bloco-card-top">
+          <span class="bloco-num">Bloco 11</span>
+          <span class="bloco-status status-todo">Em breve</span>
+        </div>
+        <h3>Temas Transversais e Habilidades FUVEST</h3>
+        <ul class="bloco-temas">
+          <li>Interpretação de fontes históricas</li>
+          <li>Historiografia: como se escreve a história?</li>
+          <li>Revolução x Reforma</li>
+          <li>Trabalho ao longo da história</li>
+          <li>Gênero e mulheres na história</li>
+          <li>Meio ambiente e história</li>
+        </ul>
+        <div class="bloco-links">
+          <a class="bloco-link bloco-link-disabled">Guias — em breve</a>
+          <a class="bloco-link bloco-link-disabled bloco-link-sim">Simulado — em breve</a>
+        </div>
+      </div>
+
+    </div>
+
+    <footer class="footer">
+      <strong>History</strong> — Plataforma de Estudos FUVEST &nbsp;·&nbsp;
+      Desenvolvida com rigor acadêmico &nbsp;·&nbsp; 2025
+    </footer>
+
+  </div><!-- /wrap -->
+
+</body>
+</html>
